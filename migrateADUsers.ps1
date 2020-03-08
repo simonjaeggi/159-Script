@@ -25,42 +25,42 @@ foreach ($sourceUser in $sourceUsers) {
     $surname = get-sanitizedUTF8Input $sourceUser.surname
     $givenname = get-sanitizedUTF8Input $sourceUser.givenname
     $ignoreString = "deaktiviert"
-    if (!($sourceUser.description -contains $ignoreString)) {
+    if (!($sourceUser.description -match $ignoreString)) {
         #define $userRole and groups !!all users are separated into individual if queries for later group assignment!!
         #get instructors
-        if ($sourceUser.description -contains "Lehrer") {
+        if ($sourceUser.description -match "Lehrer") {
             $userRole = "L"
-            if ($sourceUser.description -contains "Lehrer Gym") {
+            if ($sourceUser.description -match "Lehrer Gym") {
 
             }
-            elseif ($sourceUser.description -contains "Lehrer Handel") {
+            elseif ($sourceUser.description -match "Lehrer Handel") {
 
             }
-            elseif ($sourceUser.description -contains "Lehrer Sekundar") {
+            elseif ($sourceUser.description -match "Lehrer Sekundar") {
 
             }
         }
         #get students
-        elseif ($sourceUser.description -contains "Oberstufe - Matur") {
+        elseif ($sourceUser.description -match "Oberstufe - Matur") {
             $userRole = "S"
         }
-        elseif ($sourceUser.description -contains "Oberstufe extern") {
+        elseif ($sourceUser.description -match "Oberstufe extern") {
             $userRole = "S"
         }
-        elseif ($sourceUser.description -contains "Sekundar extern") {
+        elseif ($sourceUser.description -match "Sekundar extern") {
             $userRole = "S"
         }
-        elseif ($sourceUser.description -contains "Sekundar") {
+        elseif ($sourceUser.description -match "Sekundar") {
             $userRole = "S"
         }
-        elseif ($sourceUser.description -contains "Handelsmatur") {
+        elseif ($sourceUser.description -match "Handelsmatur") {
             $userRole = "S"
         }
         #get management people
-        elseif ($sourceUser.description -contains "Leitung") {
+        elseif ($sourceUser.description -match "Leitung") {
             $userRole = "A"
         }
-        elseif ($sourceUser.description -contains "Verwaltung") {
+        elseif ($sourceUser.description -match "Verwaltung") {
             $userRole = "A"
         }
 
@@ -79,6 +79,7 @@ foreach ($sourceUser in $sourceUsers) {
         $newUser | Add-Member -type NoteProperty -Name 'surname' -Value $surname
         $newUser | Add-Member -type NoteProperty -Name 'givenname' -Value $givenName
         $newUser | Add-Member -type NoteProperty -Name 'username' -Value $username
+        $newUser | Add-Member -type NoteProperty -Name 'description' -Value $sourceuser.Description
         $finalUsers += $newUser
 
         #userCount +1
