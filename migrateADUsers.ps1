@@ -4,7 +4,9 @@ $finalUsers = @()
 
 #set usercount to 1
 $userCount = 0
-
+$userBaseOu =  "ou=User,ou=Verwaltung,dc=gertzenstein,dc=local"
+$gid=$null
+$uidCount = 1000
 #function which can be used to get rid of diacritics and special chars
 function get-sanitizedUTF8Input {
     Param(
@@ -82,12 +84,28 @@ foreach ($sourceUser in $sourceUsers) {
         $newUser | Add-Member -type NoteProperty -Name 'description' -Value $sourceuser.Description
         $finalUsers += $newUser
 
+
+        $output += "#-------------- User $username start --------------"
+        $output += "dn: uid=$username,ou=$userBaseOu"
+        $output += "cn: $surname $givenname"
+        $output += "sn: $surname"
+        $output += "givenname: $givenname"
+        $output += "homedirectory: /home/users/$username"
+        $output += "gidnumber: $gid"
+        $output += "objectclass: inetOrgPerson"
+        $output += "objectclass: posixAccount"
+        $output += "objectclass: top"
+        $output += "uid: $username"
+        $output += "uidnumber: $uidCount"
+        $output += "#-------------- User $username end ---------------"
         #userCount +1
         $userCount++
+        $uidCount++
     }else{
-        Write-Host "User $givenname $surname was ignored, because his/her description contained the string '$ignoreString'"
-        Write-Host "Description: " $sourceUser.Description
+        #Write-Host "User $givenname $surname was ignored, because his/her description contained the string '$ignoreString'"
+        #Write-Host "Description: " $sourceUser.Description
     }
+    
 }
 
 
