@@ -41,8 +41,6 @@ $finalUsers = @()
 
 #set usercount to 1
 $userCount = 0
-$userBaseOu = "ou=User,ou=Verwaltung,dc=gertzenstein,dc=local"
-$gid = $null
 $uidCount = 1000
 [array]$output = $null
 [array]$test = $null
@@ -55,6 +53,8 @@ $uidCount = 1000
 foreach ($sourceUser in $sourceUsers) {
     $surname = get-sanitizedUTF8Input $sourceUser.surname
     $givenname = get-sanitizedUTF8Input $sourceUser.givenname
+    $userBaseOu = "ou=User,ou=Verwaltung,dc=gertzenstein,dc=local"
+    $gid = 509
     #$ignoreString = "deaktiviert"
     #if (!($sourceUser.description -match $ignoreString)) {
     #define $userRole and groups !!all users are separated into individual if queries for later
@@ -100,9 +100,9 @@ foreach ($sourceUser in $sourceUsers) {
     else {
         $userRole = "S"
     }
-    #overwrite gid if description matches "deaktiviert"
+    #save to different ou if description matches "deaktiviert"
     if ($sourceUser.description -match "deaktiviert") {
-        
+        $userBaseOu = "ou=Deaktiviert,ou=Verwaltung,dc=gertzenstein,dc=local"
     }
 
     #Convert int to string to allow leading 0's (new var is required, because otherwise you would 
@@ -128,20 +128,27 @@ foreach ($sourceUser in $sourceUsers) {
     $finalUsers += $newUser
 
 
-    $output += "#-------------- User $username start --------------" + "`r`n" +
-    "dn: uid=$username,ou=$userBaseOu" + "`r`n" +
-    "cn: $surname $givenname" + "`r`n" +
-    "sn: $surname" + "`r`n" +
-    "givenname: $givenname" + "`r`n" +
-    "homedirectory: /home/users/$username" + "`r`n" +
-    "gidnumber: $gid" + "`r`n" +
-    "objectclass: inetOrgPerson" + "`r`n" +
-    "objectclass: posixAccount" + "`r`n" +
-    "objectclass: top" + "`r`n" +
-    "uid: $username" + "`r`n" +
-    "uidnumber: $uidCount" + "`r`n" +
-    "userPassword: $password" + "`r`n" +
+    "#-------------- User $username start --------------"
+    "dn: uid=$username,$userBaseOu"
+    "changetype: add"
+    "loginShell: /bin/bash"
+    "objectclass: inetOrgPerson" 
+    "objectclass: posixAccount"
+    "objectClass: organizationalPerson"
+    "objectclass: top"
+    "cn: $givenname $surname"
+    "givenname: $givenname"
+    "sn: $surname"
+    "uid: $username"
+    "homedirectory: /home/users/$username"
+    "gidnumber: $gid"
+    "uidnumber: $uidCount"
+    "userPassword: $password"
     "#-------------- User $username end ---------------"
+    #Write empty line so that openldap can see where the next object starts
+    ""
+
+
     #userCount +1
     $userCount++
     $uidCount++
@@ -151,11 +158,10 @@ foreach ($sourceUser in $sourceUsers) {
     #Write-Host "Description: " $sourceUser.Description
     #}
     #Simple combination of names for later comparison to check for non unique accounts
-    $test += $givenname + $surname 
+    #$test += $givenname + $surname 
     
 }
 
-$reference = $test | select-object -unique
-Write-Host "Doppelte Benutzer anhand Kombination von Vor- und Nachname:" -ForegroundColor yellow
-Compare-object –referenceobject $reference –differenceobject $test
-$output | Out-File -Encoding utf8 -FilePath "C:\Skripts\159\output.ldif"
+#$reference = $test | select-object -unique
+#Write-Host "#Doppelte Benutzer anhand Kombination von Vor- und Nachname:" -ForegroundColor yellow
+#Write-Host Compare-object –referenceobject $reference –differenceobject $test
