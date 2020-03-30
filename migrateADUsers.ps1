@@ -122,7 +122,6 @@ foreach ($sourceUser in $sourceUsers) {
     $newUser | Add-Member -type NoteProperty -Name 'surname' -Value $surname
     $newUser | Add-Member -type NoteProperty -Name 'givenname' -Value $givenName
     $newUser | Add-Member -type NoteProperty -Name 'username' -Value $username
-    $newUser | Add-Member -type NoteProperty -Name 'description' -Value $sourceuser.Description
     $newUser | Add-Member -type NoteProperty -Name 'password' -Value $password
     
     $finalUsers += $newUser
@@ -158,10 +157,10 @@ foreach ($sourceUser in $sourceUsers) {
     #Write-Host "Description: " $sourceUser.Description
     #}
     #Simple combination of names for later comparison to check for non unique accounts
-    #$test += $givenname + $surname 
-    
+    $test += $givenname + $surname 
 }
 
-#$reference = $test | select-object -unique
-#Write-Host "#Doppelte Benutzer anhand Kombination von Vor- und Nachname:" -ForegroundColor yellow
-#Write-Host Compare-object –referenceobject $reference –differenceobject $test
+$reference = $test | select-object -unique
+Write-Host "#Doppelte Benutzer anhand Kombination von Vor- und Nachname:" -ForegroundColor yellow
+Compare-object –referenceobject $reference –differenceobject $test
+$finalUsers | Export-Csv -Delimiter ";" -Path "C:\Skripts\159\BenutzerInklPasswort.csv"
